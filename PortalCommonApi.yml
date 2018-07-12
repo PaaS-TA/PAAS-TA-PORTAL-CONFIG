@@ -1,0 +1,192 @@
+# Spring properties
+spring:
+  application:
+    name: PortalCommonApi  # Service registers under this name
+  security:
+    username: admin
+    password: openpaasta
+  boot:
+    #Spring boot admin settings
+    admin:
+      routes:
+        endpoints: env,metrics,trace,info,trace,heapdump,hystrix.stream,docs
+        #Timeintervalin ms to update the status of App
+      monitor:
+        perio: 10000
+        #LifeTime of App status in ms.
+        status-lifetime: 10000
+        #Connection Timeout in ms when App's status and info
+        connect-timeout: 2000
+        #Read Timeout in ms when App's status and info
+        read-timeout: 5000
+      metadata-keys-to-sanitize: .password$,.*secret$,.*key$,.$token$,.credentials.,.*vcap_services$
+
+##INFRA_ADMIN Settings
+project:
+  name: paasta-common-api
+  artifactId: paasta-common-service
+  description: paasta-database management api
+info:
+  app:
+    encoding: Encoding - UTF-8
+  java:
+    source: Source - java ver
+    target: Instance1 - Java ver
+  spring:
+    profiles: ${spring.profiles.active:default}
+  build:
+    name: ${project.name}
+    artifact: ${project.artifactId}
+    description: ${project.description}
+
+
+# HTTP Server
+server:
+  port: ${PORT:2223}   # HTTP (Tomcat) port
+
+management:
+  security:
+    enabled: false
+
+
+---
+spring:
+  profiles: local
+datasource:
+  cc:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5524/ccdb
+    username: ccadmin
+    password: admin
+  portal:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/portaldb
+    username: root
+    password: '!paas_ta202'
+  uaa:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5524/uaadb
+    username: uaaadmin
+    password: admin
+jpa:
+  database: postgresql
+  show-sql: true
+  hibernate:
+    ddl-auto: none
+    naming:
+      strategy: org.hibernate.dialect.MySQL5Dialect
+  generate-ddl: false
+mail:
+  smtp:
+    host: smtp.gmail.com
+    port: 465
+    username: PaaS-TA
+    password: USER_PASSWORD
+    useremail: USEREMAIL@gmail.com
+    properties:
+      auth: true
+      starttls:
+        enable: true
+        required: true
+      maximumTotalQps: 90
+      authUrl: http://xxx.xxx.xxx.xxx # WEBUSERPORTL 주소
+      imgUrl: http://52.201.48.51:8080/v1/KEY_84586dfdc15e4f8b9c2a8e8090ed9810/portal-container/65bdc7f43e11433b8f17683f96c7e626.png
+      charset: UTF-8
+      subject: 'PaaS-TA User Potal 인증메일'
+      createUrl: authcreate # 고정
+      expiredUrl: authreset # 고정
+      inviteUrl: inviteorg  # 고정
+paasta:
+  portal:
+    api:
+      authorization:
+        base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
+      zuulUrl:
+        cfapi: http://localhost:2225/portalapi
+        commonapi: http://localhost:2225/commonapi
+        storageapi: http://localhost:2225/storageapi
+    storageapi:
+      type: swift
+
+hystrix:
+  threadpool:
+    default:
+      # Maximum number of concurrent requests when using thread pools (Default: 10)
+      coreSize: 100
+      # Maximum LinkedBlockingQueue size - -1 for using SynchronousQueue (Default: -1)
+      maxQueueSize: -1
+      # Queue size rejection threshold (Default: 5)
+      queueSizeRejectionThreshold: 5
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 60000
+        requestVolumeThreshold: 3
+      execution:
+        isolation:
+          #strategy: SEMAPHORE, no thread pool but timeout handling stops to work
+          strategy: THREAD
+          thread:
+            timeoutInMilliseconds: 60000
+
+
+
+---
+spring:
+  profiles: dev
+
+datasource:
+  cc:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://xxx.xxx.xxx.xxx:5524/ccdb
+    username: ccadmin
+    password: admin
+  portal:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://xxx.xxx.xxx.xxx:3306/portaldb
+    username: root
+    password: '!paas_ta202'
+  uaa:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://xxx.xxx.xxx.xxx:5524/uaadb
+    username: uaaadmin
+    password: admin
+jpa:
+  database: postgresql
+  show-sql: true
+  hibernate:
+    ddl-auto: none
+    naming:
+      strategy: org.hibernate.dialect.MySQL5Dialect
+  generate-ddl: false
+mail:
+  smtp:
+    host: smtp.gmail.com
+    port: 465
+    username: PaaS-TA
+    password: USER_PASSWORD
+    useremail: USEREMAIL@gmail.com
+    properties:
+      auth: true
+      starttls:
+        enable: true
+        required: true
+      maximumTotalQps: 90
+      authUrl: http://xxx.xxx.xxx.xxx # WEBUSERPORTAL 주소
+      imgUrl: http://52.201.48.51:8080/v1/KEY_84586dfdc15e4f8b9c2a8e8090ed9810/portal-container/65bdc7f43e11433b8f17683f96c7e626.png
+      charset: UTF-8
+      subject: 'PaaS-TA User Potal 인증메일'
+      createUrl: authcreate # 고정
+      expiredUrl: authreset # 고정
+      inviteUrl: inviteorg  # 고정
+paasta:
+  portal:
+    api:
+      authorization:
+        base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
+      zuulUrl:
+        cfapi: http://xxx.xxx.xxx.xxx:2225/portalapi #xxx.xxx.xxx.xxx 는 GateWay서버 주소
+        commonapi: http://xxx.xxx.xxx.xxx:2225/commonapi #xxx.xxx.xxx.xxx 는 GateWay서버 주소
+        storageapi: http://xxx.xxx.xxx.xxx:2225/storageapi #xxx.xxx.xxx.xxx 는 GateWay서버 주소
+    storageapi:
+      type: swift

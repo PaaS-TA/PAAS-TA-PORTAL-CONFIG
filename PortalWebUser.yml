@@ -1,0 +1,112 @@
+# Spring properties
+spring:
+  application:
+    name: PortalWebUser  # Identify this application
+  boot:
+    #Spring boot admin settings
+    admin:
+      url: http://localhost:2227
+      routes:
+        endpoints: env,metrics,trace,dump,jolokia,info,configprops,trace,logfile,refresh,flyway,liquibase,heapdump,loggers,auditevents,hystrix.stream,docs
+        #Timeintervalin ms to update the status of App
+      monitor:
+        perio: 10000
+        #LifeTime of App status in ms.
+        status-lifetime: 10000
+        #Connection Timeout in ms when App's status and info
+        connect-timeout: 2000
+        #Read Timeout in ms when App's status and info
+        read-timeout: 5000
+      metadata-keys-to-sanitize: .password$,.*secret$,.*key$,.$token$,.credentials.,.*vcap_services$
+##INFRA_ADMIN Settings
+project:
+  name: paasta-web-admin
+  artifactId: paasta-web-admin
+  description: paasta web admin  ui service
+info:
+  app:
+    encoding: Encoding - UTF-8
+  java:
+    source: Source - java ver
+    target: Instance1 - Java ver
+  spring:
+    profiles: ${spring.profiles.active:default}
+  build:
+    name: ${project.name}
+    artifact: ${project.artifactId}
+    description: ${project.description}
+
+management:     # If you set off security...
+  security:
+    enabled: false
+
+multipart:
+  maxFileSize: 1000Mb
+  maxRequestSize: 1000Mb
+
+# HTTP Server
+server:
+  port: ${PORT:8080}   # HTTP (Tomcat) port
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${vcap.application.uris[0]:localhost}:2221/eureka/
+
+# paasta
+paasta:
+  portal:
+    api:
+      authorization:
+        base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
+      url: http://PORTALAPI
+      autoSchedulerUrl: http://PORTAL-AUTO-SCALING
+    # zuul사용여부에 따른 설정(juul서버를 사용하지 않을때 API호출 URL을 변경하는 flag).
+    zuulDisabled: false   # true: not used zuul(각 profile의 zuulUrl를 참조함). true외: use zuul. (portal.api.url를 사용함).
+ribbon:
+    eureka:
+        enabled: true
+    ConnectTimeout: 30000
+    ReadTimeout: 30000
+cf:
+  uaa:
+    oauth:
+      info:
+        uri: https://uaa.xxx.xxx.xxx.xxx.xip.io/userinfo # xxx.xxx.xxx.xxx 는 CF 서버 주소 - 재설정
+      token:
+        check:
+          uri: https://uaa.xxx.xxx.xxx.xxx.xip.io/check_token # xxx.xxx.xxx.xxx 는 CF 서버 주소 - 재설정
+        access:
+          uri: https://uaa.xxx.xxx.xxx.xxx.xip.io/oauth/token # xxx.xxx.xxx.xxx 는 CF 서버 주소 - 재설정
+      logout:
+        url: https://uaa.xxx.xxx.xxx.xxx.xip.io/logout
+      authorization:
+        uri: https://uaa.xxx.xxx.xxx.xxx.xip.io/oauth/authorize # xxx.xxx.xxx.xxx 는 CF 서버 주소 - 재설정
+      client:
+        id: portalclient
+        secret: clientsecret
+
+redirect:
+  parameter:
+    sendport: false
+
+
+---
+spring:
+  profiles: local
+# paasta zuul url
+paasta:
+  zuulUrl:
+    api: http://localhost:2225/portalapi
+    commApi: http://localhost:2223/portalcommonapi
+    storageApi: http://localhost:2226/portalstorageapi
+
+---
+spring:
+  profiles: dev
+# paasta zuul url
+paasta:
+  zuulUrl:
+    api: http://xxx.xxx.xxx.xxx:2225/portalapi #xxx.xxx.xxx.xxx 는 GateWay서버 주소 - 재설정
+    commApi: http://xxx.xxx.xxx.xxx:2223/portalcommonapi #xxx.xxx.xxx.xxx 는 GateWay서버 주소 - 재설정
+    storageApi: http://xxx.xxx.xxx.xxx2226/portalstorageapi #xxx.xxx.xxx.xxx 는 GateWay서버 주소 - 재설정
